@@ -29,7 +29,7 @@ SearXNGの検索結果ページに、Geminiによる概要を表示するユー�
 
 - 2.下記リンクから、スクリプトをインストールします。
 
-  - **[SearXNG Gemini Overview](https://greasyfork.org/ja/scripts/552122-searxng-gemini-summary)**
+  - **[SearXNG Gemini Overview](https://greasyfork.org/ja/scripts/552122-searxng-gemini-overview)**
  
 - 3.スクリプト内の設定を変更します。
 
