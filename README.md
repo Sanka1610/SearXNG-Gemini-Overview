@@ -1,5 +1,5 @@
 
-# SearXNG Gemini Summary
+# SearXNG Gemini Overview
 
 ## 概要
 
@@ -29,7 +29,7 @@ SearXNGの検索結果ページに、Geminiによる概要を表示するユー�
 
 - 2.下記リンクから、スクリプトをインストールします。
 
-  - **[SearXNG Gemini Summary](https://greasyfork.org/ja/scripts/552122-searxng-gemini-summary)**
+  - **[SearXNG Gemini Overview](https://greasyfork.org/ja/scripts/552122-searxng-gemini-summary)**
  
 - 3.スクリプト内の設定を変更します。
 
@@ -69,10 +69,6 @@ SearXNGの検索結果ページに、Geminiによる概要を表示するユー�
   - *://searx.*/*
  
   - *://*.searx.*/*
- 
-  - https://search.charleseroop.com/*
- 
-  - https://opnxng.com/*
  
   - http://127.0.0.1:8888/search*
  
