@@ -1,19 +1,24 @@
-
 # SearXNG Gemini Overview
 
 ## 概要
 
 SearXNGの検索結果ページに、Geminiによる概要を表示するユーザースクリプトです。
 
-検索クエリと検索結果スニペットを収集し、Geminiが生成した情報を、検索結果上部に表示します。
+SearXNGにおける「AIによる概要(Google AI Overview)」の代替としての役割を担うことを目指します。
+
+検索クエリと検索結果を収集し、Geminiが生成した情報を、検索結果上部に表示します。
 
 「[SearXNGにGemini AIの回答を表示✨️](https://github.com/koyasi777/searxng-gemini-answer-injector)」に発想を得て作成されました。
 
 ## 特徴
 
-- 検索クエリと検索結果を収集し、Geminiが生成した情報を、検索結果上部に表示します。
+- 検索クエリと検索結果を収集し、独自のプロンプトをGeminiに送信します。
+
+- Geminiが生成した情報を、検索結果上部に表示します。
 
 - 過去に検索されたワードが再検索されたとき、キャッシュを利用して概要の表示を早めます。
+
+  - v1.3.0 : 一時的に削除しています
 
 - AES-GCMによって、Gemini APIキーを暗号化して保存し、安全性を高めます。
 
@@ -27,19 +32,29 @@ SearXNGの検索結果ページに、Geminiによる概要を表示するユー�
 
   - **[Tampermonkey](https://www.tampermonkey.net/)**
 
-- 2.下記リンクから、スクリプトをインストールします。
+- 2.GitHub Releasesより、任意のバージョンの「searxng-gemini-overview_vx.y.z-Release.user」を開きます。
 
-  - **[SearXNG Gemini Overview](https://greasyfork.org/ja/scripts/552122-searxng-gemini-overview)**
- 
-- 3.スクリプト内の設定を変更します。
+  - ユーザースクリプト管理アドオンによってインストール待機画面に飛ばされます。
 
-  - CONFIGの各項目
+- 3.「+編集」を選択し、スクリプト内の設定を変更します。
+
+  - 設定の各項目
+
+    - MODEL_NAME : Gemini APIのモデル名
+
+    - MAX_RESULTS : 参照する検索結果のサイト数
+
+    - SNIPPET_CHAR_LIMIT : 参照する検索結果の文字数制限
+
+    - MAX_RETRY : 何らかのエラーにより中断された場合のリトライ回数
+
+    - RETRY_DELAY
 
   - 暗号化キー
+ 
+  - 4.「保存して閉じる」を選択します。
 
-- 4.APIキーを入力します。
-
-  - 初回検索時のみ、Gemini APIキーの入力が必要です。
+  - 5.初回検索時、Gemini APIキーの入力します。
 
   - **[Google AI Studio](https://aistudio.google.com/api-keys)** でAPIキーを取得してください。
  
