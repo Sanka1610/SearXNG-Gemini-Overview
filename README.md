@@ -57,7 +57,7 @@ SearXNGにおける「AIによる概要(Google AI Overview)」の代替として
 
 - 5.初回検索時、Gemini APIキーの入力します。
 
-- **[Google AI Studio](https://aistudio.google.com/api-keys)** でAPIキーを取得してください。
+  - **[Google AI Studio](https://aistudio.google.com/api-keys)** でAPIキーを取得してください。
  
 ## 暗号化について
 
