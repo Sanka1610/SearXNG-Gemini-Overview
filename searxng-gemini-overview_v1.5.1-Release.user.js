@@ -1,13 +1,13 @@
 // ==UserScript==
 // @name         SearXNG Gemini Overview
 // @namespace    https://github.com/Sanka1610/SearXNG-Gemini-Overview
-// @version      1.5.0
+// @version      1.5.1
 // @description  SearXNGの検索結果にGeminiによる概要を表示します
 // @author       Sanka1610
 // @match        *://127.0.0.1:8888/search*
 // @match        *://localhost:8888/search*
-// @match        *://searx.*/*
-// @match        *://searxng.*/*
+// @include     /^[^:]*?:\/\/searx\.[^/]*?\/.*?$/
+// @include     /^[^:]*?:\/\/searxng\.[^/]*?\/.*?$/
 // @match        *://search.2b9t.xyz/*
 // @match        *://search.abohiccups.com/*
 // @match        *://search.anoni.net/*
