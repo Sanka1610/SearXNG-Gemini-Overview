@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         SearXNG Gemini Overview
 // @namespace    https://github.com/Sanka1610/SearXNG-Gemini-Overview
-// @version      1.5.1
+// @version      1.6.0
 // @description  SearXNGの検索結果にGeminiによる概要を表示します
 // @author       Sanka1610
 // @match        *://127.0.0.1:8888/search*
@@ -216,27 +216,102 @@
         });
     }
 
+    // 改行制御のための内部マークと設定
+    const BREAK_MARKS = {
+        paragraph: '\u2029', // 段落区切り(空行)の内部表現
+        line: '\u2028'       // 同一段落内の強制改行の内部表現
+    };
+    const PARAGRAPH_CHAR_LIMIT = 130; // 自動段落化の目安文字数
+
+    // 文として扱わない略語 (ピリオド直後でも文の区切りにしない)
+    const ABBREVIATION_PATTERN = /(?:e\.g|i\.e|etc|vs|cf|Inc|Ltd|Co|Dr|Mr|Mrs|Ms|St|No|Fig|approx|Jr|Sr)$/i;
+
+  // 改行関連の記号を実装内部の表現へ正規化
+    function normalizeBreakMarks(input) {
+        let s = String(input ?? '');
+
+      // CRLF/CR を LF へ統一
+        s = s.replace(/\r\n?/g, '\n');
+
+      // 出典記号[n]と[br]の並び順の補正 ([br][2] → [2][br])
+        s = s.replace(/\[br\]\s*(\[\d+\])/gi, '$1[br]');
+
+      // モデル出力に含まれる実改行を内部表現へ変換 (\n{2,}は段落区切り、単一は強制改行)
+        s = s.replace(/\n{2,}/g, BREAK_MARKS.paragraph).replace(/\n/g, BREAK_MARKS.line);
+
+      // 連続する[br]は1つの段落区切りへ統合
+        s = s.replace(/(?:\s*\[br\]){2,}/gi, BREAK_MARKS.paragraph);
+
+      // 単一の[br]も段落区切りとして扱う
+        s = s.replace(/\s*\[br\]/gi, BREAK_MARKS.paragraph);
+
+        return s;
+    }
+
+  // テキストを文単位へ分割
+    function splitIntoSentences(text) {
+
+    // 日本語の句点類の後 / 英文の .!? + 空白 + 英数・引用符の開始位置で分割
+        const pieces = text.split(/(?<=[。．！？!?…])(?![。．！？!?…])|(?<=[.!?]\s)(?=[A-Z0-9"“'(])/);
+
+      // 略語の直後で分割されてしまった文を結合して復元
+        const merged = [];
+        for (const piece of pieces) {
+            if (merged.length > 0 && ABBREVIATION_PATTERN.test(merged[merged.length - 1])) {
+                merged[merged.length - 1] += piece;
+            } else {
+                merged.push(piece);
+            }
+        }
+        return merged;
+    }
+
+  // 文を指定文字数を目安に段落へグルーピング (2〜4文程度の自然な段落を作る)
+    function groupSentencesIntoParagraphs(sentences, charLimit) {
+        const paragraphs = [];
+        let buffer = '';
+        for (const raw of sentences) {
+            const sentence = raw.replace(/^\s+/, '');
+            if (!sentence) continue;
+            if (buffer && buffer.length + sentence.length > charLimit) {
+                paragraphs.push(buffer.trim());
+                buffer = '';
+            }
+            buffer += sentence;
+        }
+        if (buffer.trim()) paragraphs.push(buffer.trim());
+        return paragraphs;
+    }
+
+  // 段落構成済みテキストを構築 (\n\n = 段落区切り / \n = 強制改行)
+    function buildParagraphText(text, isListItem) {
+        const normalized = normalizeBreakMarks(text);
+        const paragraphs = [];
+
+        normalized.split(BREAK_MARKS.paragraph).forEach(block => {
+            const trimmed = block.trim();
+            if (!trimmed) return;
+
+          // 箇条書きや短いブロックはそのまま1段落として採用
+            if (isListItem || trimmed.length <= PARAGRAPH_CHAR_LIMIT) {
+                paragraphs.push(trimmed);
+                return;
+            }
+
+          // 長いブロックは文単位で段落へ再編成 ([br]が無くても可読性を担保)
+            paragraphs.push(...groupSentencesIntoParagraphs(splitIntoSentences(trimmed), PARAGRAPH_CHAR_LIMIT));
+        });
+
+        return paragraphs.join('\n\n').replace(new RegExp(BREAK_MARKS.line, 'g'), '\n');
+    }
+
     // テキスト整形
     function formatTextNodes(text, urlList, isListItem = false) {
         const fragment = document.createDocumentFragment();
         
       // 改行ロジック
-        let formatted = text;
+        let formatted = buildParagraphText(text, isListItem).replace(/\n{3,}/g, '\n\n').trim();
 
-        // 出典記号[n]と[br]の並び順の補正
-        formatted = formatted.replace(/\[br\]\s*(\[\d+\])/g, '$1[br]');
-
-        // [br]を改行コードに変更
-        if (formatted.includes('[br]')) {
-            formatted = formatted.replace(/\[br\]/g, '\n\n');
-        } else if (!isListItem) {
-
-        // [br]がない場合、従来の改行ロジック
-            formatted = formatted.replace(/。/g, '。\n\n');
-            formatted = formatted.replace(/\.(?=[A-Z])/g, '.\n\n');
-        }
-
-        formatted = formatted.replace(/\n{3,}/g, '\n\n').trim();
         const parts = formatted.split(/(\*\*.*?\*\*|\[\d+\]|\n)/g);
         
         parts.forEach(part => {
